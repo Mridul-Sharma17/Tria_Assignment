@@ -4,7 +4,7 @@ const SearchBar = ({ searchQuery, setSearchQuery }) => {
       <div className="relative">
         <input
           type="text"
-          placeholder="Search contacts..."
+          placeholder="Search by name, email or phone..."
           className="input input-bordered w-full bg-base-100"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

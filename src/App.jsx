@@ -1,63 +1,86 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ContactList from './components/ContactList'
 import SearchBar from './components/SearchBar'
 import AddContactModal from './components/AddContactModal'
 import SuccessAlert from './components/SuccessAlert'
 import ConfirmDialog from './components/ConfirmDialog'
 
-const initialContacts = [
+const defaultContacts = [
   {
     id: 1,
-    name: 'John Doe',
-    email: 'john.doe@email.com',
-    phone: '+1 (555) 123-4567'
+    name: 'Mridul Sharma',
+    email: 'mridul@gmail.com',
+    phone: '+91 98765 43210'
   },
   {
     id: 2,
-    name: 'Jane Smith',
-    email: 'jane.smith@email.com',
-    phone: '+1 (555) 234-5678'
+    name: 'Ankit Gond',
+    email: 'ankit@gmail.com',
+    phone: '+91 87654 32109'
   },
   {
     id: 3,
-    name: 'Michael Johnson',
-    email: 'michael.j@email.com',
-    phone: '+1 (555) 345-6789'
+    name: 'Shubham Markhale',
+    email: 'shubham@gmail.com',
+    phone: '+91 76543 21098'
   },
   {
     id: 4,
-    name: 'Emily Davis',
-    email: 'emily.davis@email.com',
-    phone: '+1 (555) 456-7890'
+    name: 'Anurag Etarvi',
+    email: 'anurag@gmail.com',
+    phone: '+91 65432 10987'
   },
   {
     id: 5,
-    name: 'David Wilson',
-    email: 'david.wilson@email.com',
-    phone: '+1 (555) 567-8901'
+    name: 'Jaya Sharma',
+    email: 'jaya@gmail.com',
+    phone: '+91 54321 09876'
   },
   {
     id: 6,
-    name: 'Sarah Brown',
-    email: 'sarah.brown@email.com',
-    phone: '+1 (555) 678-9012'
+    name: 'Vyakhya Agarwal',
+    email: 'vyakhya@gmail.com',
+    phone: '+91 43210 98765'
   }
 ]
 
+function loadContacts() {
+  const saved = localStorage.getItem('contacts')
+  if (saved) {
+    try {
+      return JSON.parse(saved)
+    } catch (e) {
+      return defaultContacts
+    }
+  }
+  return defaultContacts
+}
+
 function App() {
-  const [contacts, setContacts] = useState(initialContacts)
+  const [contacts, setContacts] = useState(loadContacts)
   const [searchQuery, setSearchQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(null)
 
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts))
+  }, [contacts])
+
   const sortedContacts = [...contacts].sort((a, b) =>
     a.name.localeCompare(b.name)
   )
 
-  const filteredContacts = sortedContacts.filter(contact =>
-    contact.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredContacts = sortedContacts.filter(contact => {
+    if (!searchQuery) return true
+    
+    const query = searchQuery.toLowerCase()
+    const nameMatch = contact.name.toLowerCase().includes(query)
+    const emailMatch = contact.email.toLowerCase().includes(query)
+    const phoneMatch = contact.phone.toLowerCase().includes(query)
+    
+    return nameMatch || emailMatch || phoneMatch
+  })
 
   const handleAddContact = (newContact) => {
     const contactWithId = {
@@ -93,7 +116,7 @@ function App() {
           </button>
         </div>
       </div>
-      
+
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center mb-6">
           <div className="bg-base-100 rounded-lg shadow-md px-6 py-4 min-w-fit">
@@ -102,7 +125,7 @@ function App() {
               <div className="text-sm text-base-content/70">Total Contacts</div>
             </div>
           </div>
-          
+
           <div className="flex-1 w-full">
             <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           </div>
