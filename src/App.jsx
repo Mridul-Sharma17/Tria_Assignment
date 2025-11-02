@@ -2,6 +2,8 @@ import { useState } from 'react'
 import ContactList from './components/ContactList'
 import SearchBar from './components/SearchBar'
 import AddContactModal from './components/AddContactModal'
+import SuccessAlert from './components/SuccessAlert'
+import ConfirmDialog from './components/ConfirmDialog'
 
 const initialContacts = [
   {
@@ -46,37 +48,67 @@ function App() {
   const [contacts, setContacts] = useState(initialContacts)
   const [searchQuery, setSearchQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState(null)
 
-  const filteredContacts = contacts.filter(contact =>
+  const sortedContacts = [...contacts].sort((a, b) =>
+    a.name.localeCompare(b.name)
+  )
+
+  const filteredContacts = sortedContacts.filter(contact =>
     contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const handleAddContact = (newContact) => {
-    setContacts(prev => [...prev, newContact])
+    const contactWithId = {
+      ...newContact,
+      id: Date.now()
+    }
+    setContacts(prev => [...prev, contactWithId])
+    setIsModalOpen(false)
+    setSuccessMessage('Contact added successfully!')
+  }
+
+  const handleDeleteClick = (contact) => {
+    setConfirmDelete(contact)
+  }
+
+  const confirmDeleteContact = () => {
+    if (confirmDelete) {
+      setContacts(prev => prev.filter(c => c.id !== confirmDelete.id))
+      setSuccessMessage('Contact deleted successfully!')
+      setConfirmDelete(null)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-base-100">
-      <div className="navbar bg-base-100 shadow-lg">
+    <div className="min-h-screen bg-base-200">
+      <div className="navbar bg-base-100 shadow-md">
         <div className="flex-1">
-          <a className="btn btn-ghost text-xl">Contact List</a>
+          <a className="btn btn-ghost text-xl font-semibold">Contact List</a>
         </div>
         <div className="flex-none">
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>Add Contact</button>
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            Add Contact
+          </button>
         </div>
       </div>
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="stats shadow mb-8">
-          <div className="stat">
-            <div className="stat-title">Total Contacts</div>
-            <div className="stat-value text-primary">{contacts.length}</div>
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center mb-6">
+          <div className="bg-base-100 rounded-lg shadow-md px-6 py-4 min-w-fit">
+            <div className="flex items-center gap-3">
+              <div className="text-3xl font-bold text-primary">{contacts.length}</div>
+              <div className="text-sm text-base-content/70">Total Contacts</div>
+            </div>
+          </div>
+          
+          <div className="flex-1 w-full">
+            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           </div>
         </div>
 
-        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-
-        <ContactList contacts={filteredContacts} />
+        <ContactList contacts={filteredContacts} onDeleteClick={handleDeleteClick} />
       </div>
 
       <AddContactModal
@@ -84,6 +116,21 @@ function App() {
         onClose={() => setIsModalOpen(false)}
         onAddContact={handleAddContact}
       />
+
+      <ConfirmDialog
+        isOpen={confirmDelete !== null}
+        title="Delete Contact"
+        message={`Are you sure you want to delete ${confirmDelete?.name}? This action cannot be undone.`}
+        onConfirm={confirmDeleteContact}
+        onCancel={() => setConfirmDelete(null)}
+      />
+
+      {successMessage && (
+        <SuccessAlert
+          message={successMessage}
+          onClose={() => setSuccessMessage('')}
+        />
+      )}
     </div>
   )
 }
