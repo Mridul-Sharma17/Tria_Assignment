@@ -4,7 +4,7 @@ A simple and intuitive contact management application built with React and Daisy
 
 ## 🚀 Live Demo
 
-**Deployed Application**: https://intern-assignment-96yxrw2lh-mridul-sharmas-projects-8fc52955.vercel.app
+**Deployed Application**: https://intern-assignment-jvx5dgz4g-mridul-sharmas-projects-8fc52955.vercel.app
 
 ## ✨ Features
 
